@@ -1,0 +1,60 @@
+@import "../../style/variables";
+
+$root: ".start-screen";
+
+#{$root} {
+  &_wrapper {
+    width: 100vw;
+    height: 100vh;
+    background-image: url("../../assets/img/start_bg.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    position: relative;
+
+    .direction-board {
+      position: absolute;
+    }
+
+    .snake-image {
+      width: 16em;
+      opacity: 0.9;
+      height: auto;
+    }
+
+    .start-btn {
+      color: $primary-bg-color;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+  }
+
+  &_heading {
+    font-size: 5.92rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: $primary-bg-color;
+    padding-top: 1em;
+    text-align: center;
+    text-shadow: 1px 1px 1px $primary-bg-shadow, 1px 2px 1px $primary-bg-shadow,
+      1px 3px 1px $primary-bg-shadow, 1px 4px 1px $primary-bg-shadow,
+      1px 5px 1px $primary-bg-shadow, 1px 6px 1px $primary-bg-shadow,
+      1px 7px 1px $primary-bg-shadow, 1px 8px 1px $primary-bg-shadow,
+      1px 9px 1px $primary-bg-shadow, 1px 10px 1px $primary-bg-shadow,
+      1px 18px 6px rgba(16, 16, 16, 0.4), 1px 22px 10px rgba(16, 16, 16, 0.2),
+      1px 25px 35px rgba(16, 16, 16, 0.2), 1px 30px 60px rgba(16, 16, 16, 0.4);
+  }
+
+  &_menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: baseline;
+    position: relative;
+  }
+}
