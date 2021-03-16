@@ -1,0 +1,47 @@
+@import "../../style/variables";
+
+$root: ".list";
+
+#{$root} {
+  margin-top: 1em;
+  &_item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    animation-name: animateIn;
+    animation-duration: 350ms;
+    animation-fill-mode: both;
+    animation-timing-function: ease-in-out;
+    padding: 1em;
+    margin-bottom: 10px;
+  }
+  &_item:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  @keyframes animateIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.6) translateY(-8px);
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+  /* Gold */
+  &_item:nth-child(1) {
+    background: gold;
+  }
+  /* Silver */
+  &_item:nth-child(2) {
+    background: #c0c0c0;
+  }
+  /* Bronze */
+  &_item:nth-child(3) {
+    background: #cd7f32;
+  }
+}

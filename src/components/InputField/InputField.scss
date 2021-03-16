@@ -1,0 +1,21 @@
+@import "../../style/variables";
+
+$root: ".custom-input";
+
+#{$root} {
+  font-size: 16px;
+  letter-spacing: 1px;
+  font-family: inherit;
+  padding: 0.25em 0.5em;
+  background-color: #eee;
+  border: 1px solid #8b8a8b;
+  outline: none;
+  border-radius: 4px;
+  line-height: 1;
+  height: 2.25rem;
+  transition: 180ms box-shadow ease-in-out;
+
+  &:focus {
+    border: 1px solid #8b8a8b;
+  }
+}

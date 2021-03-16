@@ -1,0 +1,18 @@
+@import "../../style/variables";
+
+$root: ".loader";
+
+#{$root} {
+  position: relative;
+
+  &_bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    opacity: 0.9;
+    background-color: $default_text_color;
+    z-index: 1000;
+  }
+}

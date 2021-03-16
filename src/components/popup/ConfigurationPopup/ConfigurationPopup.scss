@@ -1,0 +1,41 @@
+@import "../../../style/variables";
+
+$root: ".configuration";
+
+#{$root} {
+  &_field {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 2em;
+
+    &_wrapper {
+      margin-bottom: 2em;
+    }
+
+    .board-area {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      .input-field {
+        width: 40%;
+      }
+      .cross {
+        font-size: 1.4em;
+        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+      }
+    }
+    .snake-speed {
+      .difficulty-level {
+        width: 60%;
+      }
+    }
+    .error-message {
+      font-size: 14px;
+      font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+      color: red;
+      margin-bottom: 14px;
+    }
+  }
+}
