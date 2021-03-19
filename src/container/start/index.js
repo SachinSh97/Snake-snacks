@@ -73,6 +73,11 @@ class Start extends Component {
   };
 
   handleVerification = (username) => {
+    if (isEmpty(username)) {
+      this.setState({ errorMessage: startConfig.errorMessage });
+      return;
+    }
+
     this.setState({ loading: true }, () => {
       createUserApi(username).then((response) => {
         if (!isEmpty(get(response, "userName"))) {

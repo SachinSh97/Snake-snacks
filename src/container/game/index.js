@@ -1,12 +1,6 @@
 import React, { Component } from "react";
-import { cloneDeep, get, isEmpty } from "lodash";
-import { randomFood, drawCanvas } from "../../utils/helper";
-import {
-  keyCode,
-  snakePosition,
-  storageName,
-  apiRequestStatusCodes,
-} from "../../constants/global";
+import { get, isEmpty } from "lodash";
+import { storageName } from "../../constants/global";
 import { updateScoreApi } from "../../api";
 import { setItem, getItem } from "../../utils/storage";
 import backIcon from "../../assets/img/arrow_left.svg";
@@ -20,6 +14,11 @@ const ConfigurationPopup = React.lazy(() =>
 const TopTenScorePopup = React.lazy(() =>
   import("../components/TopTenScorePopup")
 );
+const SnakeBoard = React.lazy(() => import("../components/SnakeBoard"));
+const Loader = React.lazy(() => import("../../components/Loading"));
+const MessageComponent = React.lazy(() =>
+  import("../../components/MessageComponent")
+);
 
 class Game extends Component {
   constructor(props) {
@@ -27,19 +26,15 @@ class Game extends Component {
     this.state = {
       height: "",
       width: "",
-      dx: 10,
-      dy: 0,
-      foodX: 20,
-      foodY: 20,
       score: 0,
       level: 1,
-      timeOutId: 0,
-      changeDirection: false,
-      hasGameEnded: false,
       setConfiguration: true,
       openTopTenScorePopup: false,
       restart: false,
-      snakeDefaultPosition: cloneDeep(snakePosition),
+      isGameOver: false,
+      showBoard: false,
+      loading: false,
+      errorMessage: "",
     };
     this.snakeBoardRef = React.createRef();
   }
@@ -49,7 +44,6 @@ class Game extends Component {
     if (isEmpty(userData)) {
       this.props.history.push("/snack-time");
     }
-    window.addEventListener("keydown", this.changeDirection);
   }
 
   handleSetConfiguration = ({ width, height, level }) => {
@@ -58,138 +52,18 @@ class Game extends Component {
       ...userData,
       configuration: { width, height, level },
     });
-    this.setState(
-      {
-        width,
-        height,
-        level,
-        setConfiguration: false,
-        restart: false,
-        snakeDefaultPosition: cloneDeep(snakePosition),
-      },
-
-      () => {
-        this.drawSnake();
-        this.startGame();
-      }
-    );
-  };
-
-  /*Function that prints the parts*/
-  drawSnake = () => {
-    const { snakeDefaultPosition } = this.state;
-    snakeDefaultPosition.forEach((snakePart) => {
-      const snakeBoard = this.snakeBoardRef.current;
-      snakeBoard &&
-        drawCanvas(
-          snakeBoard,
-          [snakePart.x, snakePart.y, 10, 10],
-          "#de701d",
-          "none"
-        );
+    this.setState({
+      width,
+      height,
+      level,
+      setConfiguration: false,
+      showBoard: true,
+      restart: false,
     });
   };
 
-  // main function called repeatedly to keep the game running
-  startGame = () => {
-    const hasGameEnded = this.hasGameEnded();
-    this.setState({ hasGameEnded });
-    if (hasGameEnded) return;
-    const { foodX, foodY, level } = this.state;
-    const element = this.snakeBoardRef.current;
-    this.setState({ changeDirection: false });
-    let timeOutId = setTimeout(() => {
-      element &&
-        drawCanvas(
-          element,
-          [0, 0, element.width, element.height],
-          "#5c544e",
-          ""
-        );
-      element && drawCanvas(element, [foodX, foodY, 10, 10], "#579120", "");
-      this.moveSnake();
-      this.drawSnake();
-      // Call main again
-      this.startGame();
-    }, (6 - level) * 100);
-    this.setState({ timeOutId });
-  };
-
-  moveSnake = () => {
-    let { dx, snakeDefaultPosition, foodX, foodY, dy, score } = this.state;
-    const head = {
-      x: snakeDefaultPosition[0].x + dx,
-      y: snakeDefaultPosition[0].y + dy,
-    };
-    snakeDefaultPosition.unshift(head);
-    const has_eaten_food =
-      snakeDefaultPosition[0].x === foodX &&
-      snakeDefaultPosition[0].y === foodY;
-    if (has_eaten_food) {
-      // Generate new food location
-      this.setState((prev) => ({ score: prev.score + 1 }), this.genFood());
-    } else {
-      // Remove the last part of snake body
-      snakeDefaultPosition.pop();
-    }
-    this.setState({ snakeDefaultPosition });
-  };
-
-  hasGameEnded = () => {
-    const { snakeDefaultPosition } = this.state;
-    if (snakeDefaultPosition.length < 0) return;
-    for (let i = 4; i < snakeDefaultPosition.length; i++) {
-      if (
-        snakeDefaultPosition[i].x === snakeDefaultPosition[0].x &&
-        snakeDefaultPosition[i].y === snakeDefaultPosition[0].y
-      )
-        return true;
-    }
-    const hitLeftWall = snakeDefaultPosition[0].x < 0;
-    const hitRightWall =
-      snakeDefaultPosition[0].x > this.snakeBoardRef.current.width - 10;
-    const hitTopWall = snakeDefaultPosition[0].y < 0;
-    const hitBottomWall =
-      snakeDefaultPosition[0].y > this.snakeBoardRef.current.height - 10;
-    return hitLeftWall || hitRightWall || hitTopWall || hitBottomWall;
-  };
-
-  changeDirection = (event) => {
-    let { changeDirection, dy, dx } = this.state;
-    // Prevent the snake from reversing
-    if (changeDirection) return;
-    this.setState({ changeDirection: true });
-    const keyPressed = event.keyCode;
-    switch (keyPressed) {
-      case keyCode.LEFT_KEY:
-        dx = dx !== 10 ? -10 : dx;
-        dy = dx !== 10 ? 0 : dy;
-        break;
-      case keyCode.UP_KEY:
-        dx = dy !== 10 ? 0 : dx;
-        dy = dy !== 10 ? -10 : dy;
-        break;
-      case keyCode.RIGHT_KEY:
-        dx = dx !== -10 ? 10 : dx;
-        dy = dx !== -10 ? 0 : dy;
-        break;
-      case keyCode.DOWN_KEY:
-        dx = dy !== -10 ? 0 : dx;
-        dy = dy !== -10 ? 10 : dy;
-        break;
-    }
-    this.setState({ dx, dy });
-  };
-
-  genFood = () => {
-    const { snakeDefaultPosition } = this.state;
-    const foodX = randomFood(0, this.snakeBoardRef.current.width - 10);
-    const foodY = randomFood(0, this.snakeBoardRef.current.height - 10);
-    this.setState({ foodX, foodY });
-    snakeDefaultPosition.forEach((part) => {
-      const has_eaten = part.x === foodX && part.y === foodY;
-      if (has_eaten) this.genFood();
-    });
+  handleScorePoints = (score) => {
+    this.setState({ isGameOver: true, score });
   };
 
   handleGameOver = () => {
@@ -198,11 +72,10 @@ class Game extends Component {
       score: get(this.state, "score", 0),
     };
     updateScoreApi(scoreObj).then((response) => {
-      if (
-        !apiRequestStatusCodes.FORBIDDEN.includes(get(response, "status", ""))
-      ) {
-        console.log(response);
-        this.setState({ hasGameEnded: false, openTopTenScorePopup: true });
+      if (isEmpty(get(response, "message", ""))) {
+        this.setState({ isGameOver: false, openTopTenScorePopup: true });
+      } else {
+        this.setState({ errorMessage: get(response, "message", "") });
       }
     });
   };
@@ -210,76 +83,87 @@ class Game extends Component {
   handleCloseTopTenScorePopup = () => {
     this.setState({
       score: 0,
-      dx: 10,
-      dy: 0,
-      changeDirection: false,
-      hasGameEnded: false,
-      snakeDefaultPosition: cloneDeep(snakePosition),
+      isGameOver: false,
       setConfiguration: false,
       openTopTenScorePopup: false,
       restart: true,
+      showBoard: false,
     });
   };
 
   restartGame = () => {
-    this.setState({ restart: false }, this.startGame());
+    this.setState({ restart: false, showBoard: true });
   };
 
   handleBack = () => {
-    clearTimeout(this.state.timeoutId);
-    window.removeEventListener("keydown", this.handleKeyDown);
     this.props.history.push("/snake-time");
   };
 
-  componentWillUnmount() {
-    clearTimeout(this.state.timeoutId);
-    window.removeEventListener("keydown", this.handleKeyDown);
-  }
+  handleErrorMessageClose = () => {
+    this.setState({ errorMessage: "" });
+  };
+
+  handleSpinner = () => {
+    this.setState((prevState) => ({ loading: !prevState.loading }));
+  };
 
   render() {
     const {
       width,
       height,
       setConfiguration,
-      hasGameEnded,
       score,
+      level,
       openTopTenScorePopup,
       restart,
+      isGameOver,
+      showBoard,
+      loading,
+      errorMessage,
     } = this.state;
     return (
       <>
+        <MessageComponent
+          dismissible={true}
+          open={!isEmpty(errorMessage)}
+          message={errorMessage}
+          handleClose={this.handleErrorMessageClose}
+        />
+        {loading && <Loader />}
         <div className="snake-game_wrapper">
-          {restart && (
-            <div className="snake-game_restart">
-              <CustomButton
-                children="RESTART"
-                variant="info"
-                block={true}
-                handleClick={this.restartGame}
-              />
-              <div style={{ marginRight: "60px" }} />
-              <CustomButton
-                children="RESET"
-                variant="warning"
-                block={true}
-                handleClick={() => this.setState({ setConfiguration: true })}
-              />
-            </div>
-          )}
           <div className="back" onClick={this.handleBack}>
             <img src={backIcon} alt="back-icon" className="back-icon" />
           </div>
           <div className="snake-game_playground">
-            <canvas
-              ref={this.snakeBoardRef}
-              className="snake-game_board"
-              width={width}
-              height={height}
-            />
+            {restart && (
+              <div className="snake-game_restart">
+                <CustomButton
+                  children="RESTART"
+                  variant="info"
+                  block={true}
+                  handleClick={this.restartGame}
+                />
+                <div style={{ marginRight: "40px" }} />
+                <CustomButton
+                  children="RESET"
+                  variant="warning"
+                  block={true}
+                  handleClick={() => this.setState({ setConfiguration: true })}
+                />
+              </div>
+            )}
+            {showBoard && (
+              <SnakeBoard
+                width={width}
+                height={height}
+                level={level}
+                handleGameOver={this.handleScorePoints}
+              />
+            )}
           </div>
 
-          {hasGameEnded && (
-            <Popup open={hasGameEnded}>
+          {isGameOver && (
+            <Popup open={isGameOver}>
               <div className="snake-game_over">
                 <span className="title">Game Over</span>
                 <span className="sub-title">Score</span>
@@ -304,6 +188,7 @@ class Game extends Component {
         {openTopTenScorePopup && (
           <TopTenScorePopup
             open={openTopTenScorePopup}
+            handleSpinner={this.handleSpinner}
             handleClose={this.handleCloseTopTenScorePopup}
           />
         )}

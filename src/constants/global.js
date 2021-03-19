@@ -17,3 +17,11 @@ export const apiRequestStatusCodes = {
   SUCCESS: [200, 201, 202],
   FORBIDDEN: [403, 404],
 };
+
+export const unit = 10;
+
+export const snakeBoardColor = "#5c544e";
+
+export const snakeColor = "#de701d";
+
+export const foodColor = "#579120";

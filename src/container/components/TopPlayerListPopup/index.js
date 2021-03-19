@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { isEmpty, get } from "lodash";
-import { apiRequestStatusCodes } from "../../../constants/global";
 import { resource } from "../../../constants/configuration";
 import { getTopTenPlayerApi } from "../../../api";
 import "./TopPlayerListPopup.scss";

@@ -8,6 +8,7 @@ export const resource = {
     loginCTA: "Login",
     logoutCTA: "Logout",
     toolTipText: "Please login first!",
+    errorMessage: "Please provide your username",
   },
   configurationPopupConfig: {
     title: "Game Configuration",

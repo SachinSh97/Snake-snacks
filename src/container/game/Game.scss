@@ -6,15 +6,11 @@ $root: ".snake-game";
   position: relative;
 
   &_restart {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: baseline;
+    padding: 5em;
   }
 
   &_wrapper {
@@ -50,11 +46,6 @@ $root: ".snake-game";
     background-color: #444a3f;
     border-radius: 10px;
     box-shadow: 0 8px 16px 0 $box-shadow-color;
-  }
-  &_board {
-    background-image: url("../../assets/img/snake-board-bg.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
   }
   &_over {
     display: flex;
