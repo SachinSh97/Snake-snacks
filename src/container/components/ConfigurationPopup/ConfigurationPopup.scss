@@ -32,10 +32,10 @@ $root: ".configuration";
       }
     }
     .error-message {
-      font-size: 14px;
+      font-size: 1rem;
       font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-      color: red;
-      margin-bottom: 14px;
+      color: $error-msg-text-color;
+      margin-bottom: 1em;
     }
   }
 }

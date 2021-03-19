@@ -1,11 +1,15 @@
 import React, { Component } from "react";
 import { isEmpty, get } from "lodash";
 import { getItem } from "../../../utils/storage";
+import { storageName } from "../../../constants/global";
+import { resource } from "../../../constants/configuration";
 import "./ConfigurationPopup.scss";
 
-const Popup = React.lazy(() => import("../../popup"));
-const InputField = React.lazy(() => import("../../InputField"));
-const CustomButton = React.lazy(() => import("../../Button"));
+const Popup = React.lazy(() => import("../../../components/popup"));
+const InputField = React.lazy(() => import("../../../components/InputField"));
+const CustomButton = React.lazy(() => import("../../../components/Button"));
+
+const popupConfig = resource.configurationPopupConfig;
 
 class ConfigurationPopup extends Component {
   constructor(props) {
@@ -19,7 +23,7 @@ class ConfigurationPopup extends Component {
   }
 
   componentDidMount() {
-    const userData = getItem("Snake&Snack");
+    const userData = getItem(storageName);
     const configuration = get(userData, "configuration", {});
     if (!isEmpty(configuration)) {
       this.setState({
@@ -32,19 +36,7 @@ class ConfigurationPopup extends Component {
 
   handleChange = (event) => {
     const { name, value } = event.target;
-    let { width, height, level } = this.state;
-    switch (name) {
-      case "width":
-        width = value;
-        break;
-      case "height":
-        height = value;
-        break;
-      case "level":
-        level = value;
-        break;
-    }
-    this.setState({ width, height, level });
+    this.setState({ [name]: value });
   };
 
   handleSetConfiguration = () => {
@@ -59,10 +51,10 @@ class ConfigurationPopup extends Component {
       height > heightLimit
     ) {
       this.setState({
-        errorMessage: `Enter width/height between 200-${widthLimit}/${heightLimit}`,
+        errorMessage: `${popupConfig.errorMessage.area}-${widthLimit}/${heightLimit}`,
       });
     } else if (level > 5 || level < 1) {
-      this.setState({ errorMessage: "Enter difficulty level between 1-5" });
+      this.setState({ errorMessage: popupConfig.errorMessage.level });
     } else {
       this.setState(
         { errorMessage: "" },
@@ -79,13 +71,13 @@ class ConfigurationPopup extends Component {
           <span className="error-message">{errorMessage}</span>
         )}
         <div className="configuration_field_wrapper">
-          <div>Area Of Board</div>
+          <div>{popupConfig.label.area}</div>
           <div className="board-area">
             <InputField
               classList="input-field"
               type="number"
               name="width"
-              placeholder="width"
+              placeholder={popupConfig.placeholder.area.width}
               value={width}
               handleChange={this.handleChange}
             />
@@ -94,14 +86,14 @@ class ConfigurationPopup extends Component {
               classList="input-field"
               type="number"
               name="height"
-              placeholder="height"
+              placeholder={popupConfig.placeholder.area.height}
               value={height}
               handleChange={this.handleChange}
             />
           </div>
         </div>
         <div className="configuration_field_wrapper">
-          <div>Difficulty Level</div>
+          <div>{popupConfig.label.level}</div>
           <div className="snake-speed">
             <InputField
               classList="difficulty-level"
@@ -123,17 +115,25 @@ class ConfigurationPopup extends Component {
     );
   };
   render() {
-    const { open, handleClose } = this.props;
+    const { open, heading, handleClose } = this.props;
     return (
       <div className="configuration">
         <Popup
           open={open}
           handleClose={handleClose}
-          heading="Game Configuration"
+          heading={heading}
           children={this.renderConfiguration()}
         />
       </div>
     );
   }
 }
+
+ConfigurationPopup.defaultProps = {
+  open: false,
+  heading: popupConfig.title,
+  handleClose: () => {},
+  handleSetConfiguration: () => {},
+};
+
 export default ConfigurationPopup;

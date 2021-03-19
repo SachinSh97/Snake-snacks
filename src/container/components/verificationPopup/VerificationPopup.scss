@@ -1,0 +1,9 @@
+@import "../../../style/variables";
+
+$root: ".verification";
+
+#{$root} {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.42em;
+}

@@ -3,19 +3,19 @@
 $root: ".custom-input";
 
 #{$root} {
-  font-size: 16px;
+  font-size: 1.14rem;
   letter-spacing: 1px;
   font-family: inherit;
   padding: 0.25em 0.5em;
-  background-color: #eee;
-  border: 1px solid #8b8a8b;
+  background-color: $input-field-bg-color;
+  border: 1px solid $input-field-border-color;
   outline: none;
   border-radius: 4px;
   line-height: 1;
-  height: 2.25rem;
+  height: 2.25em;
   transition: 180ms box-shadow ease-in-out;
 
   &:focus {
-    border: 1px solid #8b8a8b;
+    border: 1px solid $input-field-border-color;
   }
 }

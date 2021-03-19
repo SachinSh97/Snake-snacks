@@ -27,4 +27,15 @@ class InputField extends Component {
     );
   }
 }
+
+InputField.defaultProps = {
+  classList: "",
+  type: "text",
+  placeholder: "",
+  value: "",
+  name: "",
+  required: false,
+  onChange: () => {},
+};
+
 export default InputField;

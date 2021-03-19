@@ -3,16 +3,46 @@
 $root: ".loader";
 
 #{$root} {
-  position: relative;
-
+  &_spin {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 0.7em solid $background;
+    border-radius: 50%;
+    border-top: 0.7em solid $loader-color;
+    width: 5.71em;
+    height: 5.71em;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+    z-index: 10;
+  }
   &_bg {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
-    opacity: 0.9;
     background-color: $default_text_color;
-    z-index: 1000;
+    z-index: 9;
+  }
+
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% {
+      -webkit-transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 }

@@ -1,57 +1,64 @@
 import React, { Component } from "react";
-import { isEmpty } from "lodash";
+import { isEmpty, get } from "lodash";
 import { Link } from "react-router-dom";
-import { StartPageConfig } from "../../constants/configuration";
+import { resource } from "../../constants/configuration";
+import { storageName } from "../../constants/global";
 import { setItem, removeItem, getItem } from "../../utils/storage";
+import { createUserApi } from "../../api";
 import infoIcon from "../../assets/img/info-icon.svg";
 import "./Start.scss";
 
-import { data } from "../../dummyData";
-import TopTenScorePopup from "../../components/popup/TopTenScorePopup";
-
 const CustomButton = React.lazy(() => import("../../components/Button"));
-const Popup = React.lazy(() => import("../../components/popup"));
-const Form = React.lazy(() => import("../../components/Form"));
-const Loader = React.lazy(() => import("../../components/Loading"));
 const TopPlayerPopup = React.lazy(() =>
-  import("../../components/popup/TopPlayerListpopup")
+  import("../components/TopPlayerListPopup")
 );
+const VerificationPopup = React.lazy(() =>
+  import("../components/verificationPopup")
+);
+const TopTenScorePopup = React.lazy(() =>
+  import("../components/TopTenScorePopup")
+);
+const CustomTooltip = React.lazy(() => import("../../components/Tooltip"));
+const SnakeBoard = React.lazy(() => import("../../components/SnakeBoard"));
+
+const startConfig = resource.startContainerConfig;
 class Start extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      verificationPopup: false,
       openTopPlayerPopup: false,
       openTopTenScorePopup: false,
+      openVerificationPopup: false,
       login: false,
-      username: "",
-      new: false,
+      loading: false,
     };
   }
 
   componentDidMount() {
-    const userData = getItem("Snake&Snack");
+    const userData = getItem(storageName);
     if (!isEmpty(userData)) {
-      this.setState({ login: true, username: userData.name });
+      this.setState({ login: true });
     }
   }
 
   handleOpenPopup = () => {
-    this.setState({ verificationPopup: true });
+    this.setState({ openVerificationPopup: true });
   };
 
   renderContent = (name) => {
     return (
       <>
         {name}
-        <img src={infoIcon} alt="info-icon" className="info-icon" />
+        <CustomTooltip description={startConfig.toolTipText}>
+          <img src={infoIcon} alt="info-icon" className="info-icon" />
+        </CustomTooltip>
       </>
     );
   };
 
   handleClosePopup = () => {
     this.setState({
-      verificationPopup: false,
+      openVerificationPopup: false,
       openTopPlayerPopup: false,
       openTopTenScorePopup: false,
     });
@@ -61,25 +68,18 @@ class Start extends Component {
     this.setState({ openTopPlayerPopup: true });
   };
 
-  handleChange = (event) => {
-    const { value } = event.target;
-    this.setState({ username: value });
-  };
-
-  handleSubmit = () => {
-    const { username } = this.state;
-    const userData = data.users.find((item) => item.name === username);
-    setItem("Snake&Snack", !isEmpty(userData) && { ...userData });
-    this.setState({
-      new: username ? true : false,
-      login: true,
-      verificationPopup: false,
-    });
-  };
-
-  handleLogout = () => {
-    this.setState({ login: false, username: "", new: false }, () => {
-      removeItem("Snake&Snack");
+  handleVerification = (username) => {
+    this.setState({ loading: true }, () => {
+      createUserApi(username).then((response) => {
+        if (!isEmpty(get(response, "userName"))) {
+          this.setState(
+            { openVerificationPopup: false, login: true, loading: false },
+            () => {
+              setItem(storageName, response);
+            }
+          );
+        }
+      });
     });
   };
 
@@ -87,23 +87,31 @@ class Start extends Component {
     this.setState({ openTopTenScorePopup: true });
   };
 
+  handleLogout = () => {
+    this.setState({ login: false }, () => {
+      removeItem(storageName);
+    });
+  };
+
   render() {
     const {
-      verificationPopup,
       openTopPlayerPopup,
       login,
-      username,
       openTopTenScorePopup,
+      openVerificationPopup,
     } = this.state;
     return (
       <>
+        {/* <SnakeBoard width={400} height={400} /> */}
         <div className="start-screen_wrapper">
-          <div className="start-screen_heading">{StartPageConfig.heading}</div>
+          <div className="start-screen_heading">{startConfig.heading}</div>
           <div className="start-screen_menu">
             <Link to={`/snack-time/lets-eat`}>
               <CustomButton
                 children={
-                  !login ? this.renderContent("Let's Begin") : "Let's Begin"
+                  !login
+                    ? this.renderContent(startConfig.letBeginCTA)
+                    : startConfig.letBeginCTA
                 }
                 disabled={!login}
                 variant={!login ? "secondary" : "primary"}
@@ -111,37 +119,26 @@ class Start extends Component {
             </Link>
             <CustomButton
               children={
-                !login ? this.renderContent("Top Score's") : "Top Score's"
+                !login
+                  ? this.renderContent(startConfig.topScoreCTA)
+                  : startConfig.topScoreCTA
               }
               disabled={!login}
               variant={!login ? "secondary" : "primary"}
               handleClick={this.handleOpenTopTenScorePopup}
             />
             <CustomButton
-              children="Top Player's"
+              children={startConfig.topPlayerCTA}
               variant="primary"
               handleClick={this.handleOpenTopPlayerPopup}
             />
             <CustomButton
-              children={!login ? "Login" : "Logout"}
+              children={!login ? startConfig.loginCTA : startConfig.logoutCTA}
               variant="primary"
               handleClick={!login ? this.handleOpenPopup : this.handleLogout}
             />
           </div>
         </div>
-        {verificationPopup && (
-          <Popup
-            open={verificationPopup}
-            handleClose={this.handleClosePopup}
-            children={
-              <Form
-                username={username}
-                handleChange={this.handleChange}
-                handleSubmit={this.handleSubmit}
-              />
-            }
-          />
-        )}
         {openTopPlayerPopup && (
           <TopPlayerPopup
             open={openTopPlayerPopup}
@@ -154,13 +151,17 @@ class Start extends Component {
             handleClose={this.handleClosePopup}
           />
         )}
+
+        {openVerificationPopup && (
+          <VerificationPopup
+            open={openVerificationPopup}
+            handleVerification={this.handleVerification}
+            handleClose={this.handleClosePopup}
+          />
+        )}
       </>
     );
   }
 }
-
-Start.defaultProps = {
-  user: "",
-};
 
 export default Start;

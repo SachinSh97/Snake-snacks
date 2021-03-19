@@ -5,11 +5,11 @@ $root: ".snake-game";
 #{$root} {
   position: relative;
 
-  &_restart{
+  &_restart {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     z-index: 1;
     display: flex;
     flex-direction: row;
@@ -48,32 +48,36 @@ $root: ".snake-game";
     transform: translate(-50%, -50%);
   }
   &_board {
-    border: 5px solid black;
+    background-image: url("../../assets/img/snake-board-bg.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
   }
-  &_over{
+  &_over {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    .title{
+    .title {
       font-size: 32px;
     }
-    .sub-title{
+    .sub-title {
       font: 16px;
       letter-spacing: 1px;
-      animation: score 1s ease-in-out infinite ;
+      animation: score 1s ease-in-out infinite;
     }
-    .score{
-      font-size:32px ;
-      margin-bottom: 15px;      
+    .score {
+      font-size: 32px;
+      margin-bottom: 15px;
     }
     @keyframes score {
-      0%{
-        color:blue;
-      }50%{
-        color:cadetblue;
-      }100%{
+      0% {
+        color: blue;
+      }
+      50% {
+        color: cadetblue;
+      }
+      100% {
         color: green;
       }
     }

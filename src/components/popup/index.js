@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./Popup.scss";
 
-export default class index extends Component {
+class Popup extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -26,3 +26,12 @@ export default class index extends Component {
     );
   }
 }
+
+Popup.defaultProps = {
+  open: false,
+  children: <></>,
+  heading: null,
+  handleClose: () => {},
+};
+
+export default Popup;

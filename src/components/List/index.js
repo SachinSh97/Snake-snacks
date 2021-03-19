@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { isEmpty } from "lodash";
 import "./List.scss";
 
 class List extends Component {
@@ -6,16 +7,18 @@ class List extends Component {
     const { listData } = this.props;
     return (
       <div className="list">
-        {listData &&
-          listData.map((item, index) => (
-            <div className="list_item">
-              <div className="list_title">{item.name}</div>
-              <div className="list_description">{`score : ${item.topScore}`}</div>
-            </div>
-          ))}
+        {!isEmpty(listData) ? (
+          listData.map((item) => item)
+        ) : (
+          <div className="empty">No score's</div>
+        )}
       </div>
     );
   }
 }
+
+List.defaultProps = {
+  listData: [],
+};
 
 export default List;

@@ -1,13 +1,20 @@
 import React, { Component } from "react";
 import Button from "react-bootstrap/Button";
 
-export default class CustomButton extends Component {
+class CustomButton extends Component {
   render() {
-    const { children, disabled, variant, handleClick, block } = this.props;
+    const {
+      children,
+      disabled,
+      variant,
+      handleClick,
+      block,
+      size,
+    } = this.props;
     return (
       <Button
         variant={variant}
-        size="lg"
+        size={size}
         disabled={disabled}
         block={block}
         onClick={handleClick}
@@ -17,3 +24,13 @@ export default class CustomButton extends Component {
     );
   }
 }
+
+CustomButton.defaultProps = {
+  variant: "",
+  size: "lg",
+  disabled: false,
+  block: false,
+  onClick: () => {},
+};
+
+export default CustomButton;

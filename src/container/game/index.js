@@ -1,7 +1,13 @@
 import React, { Component } from "react";
-import { isEmpty, cloneDeep } from "lodash";
+import { cloneDeep, get, isEmpty } from "lodash";
 import { randomFood, drawCanvas } from "../../utils/helper";
-import { keyCode, snakePosition } from "../../constants/global";
+import {
+  keyCode,
+  snakePosition,
+  storageName,
+  apiRequestStatusCodes,
+} from "../../constants/global";
+import { updateScoreApi } from "../../api";
 import { setItem, getItem } from "../../utils/storage";
 import backIcon from "../../assets/img/arrow_left.svg";
 import "./Game.scss";
@@ -9,13 +15,11 @@ import "./Game.scss";
 const CustomButton = React.lazy(() => import("../../components/Button"));
 const Popup = React.lazy(() => import("../../components/popup"));
 const ConfigurationPopup = React.lazy(() =>
-  import("../../components/popup/ConfigurationPopup")
+  import("../components/ConfigurationPopup")
 );
 const TopTenScorePopup = React.lazy(() =>
-  import("../../components/popup/TopTenScorePopup")
+  import("../components/TopTenScorePopup")
 );
-
-let Level = 0;
 
 class Game extends Component {
   constructor(props) {
@@ -28,20 +32,28 @@ class Game extends Component {
       foodX: 20,
       foodY: 20,
       score: 0,
+      level: 1,
+      timeOutId: 0,
       changeDirection: false,
       hasGameEnded: false,
-      snakeDefaultPosition: cloneDeep(snakePosition),
-      level: 1,
       setConfiguration: true,
       openTopTenScorePopup: false,
       restart: false,
+      snakeDefaultPosition: cloneDeep(snakePosition),
     };
     this.snakeBoardRef = React.createRef();
   }
 
+  componentDidMount() {
+    let userData = getItem(storageName);
+    if (isEmpty(userData)) {
+      this.props.history.push("/snack-time");
+    }
+  }
+
   handleSetConfiguration = ({ width, height, level }) => {
-    let userData = getItem("Snake&Snack");
-    setItem("Snake&Snack", {
+    let userData = getItem(storageName);
+    setItem(storageName, {
       ...userData,
       configuration: { width, height, level },
     });
@@ -58,7 +70,7 @@ class Game extends Component {
       () => {
         this.drawSnake();
         this.startGame();
-        document.addEventListener("keydown", this.changeDirection);
+        window.addEventListener("keydown", this.changeDirection);
       }
     );
   };
@@ -66,7 +78,6 @@ class Game extends Component {
   /*Function that prints the parts*/
   drawSnake = () => {
     const { snakeDefaultPosition } = this.state;
-    debugger;
     snakeDefaultPosition.forEach((snakePart) => {
       const snakeBoard = this.snakeBoardRef.current;
       snakeBoard &&
@@ -87,14 +98,9 @@ class Game extends Component {
     const { foodX, foodY, level } = this.state;
     const element = this.snakeBoardRef.current;
     this.setState({ changeDirection: false });
-    setTimeout(() => {
+    let timeOutId = setTimeout(() => {
       element &&
-        drawCanvas(
-          element,
-          [0, 0, element.width, element.height],
-          "white",
-          "black"
-        );
+        drawCanvas(element, [0, 0, element.width, element.height], "", "");
       element &&
         drawCanvas(element, [foodX, foodY, 10, 10], "lightgreen", "darkgreen");
       this.moveSnake();
@@ -102,6 +108,7 @@ class Game extends Component {
       // Call main again
       this.startGame();
     }, (6 - level) * 100);
+    this.setState({ timeOutId });
   };
 
   moveSnake = () => {
@@ -182,7 +189,18 @@ class Game extends Component {
   };
 
   handleGameOver = () => {
-    this.setState({ hasGameEnded: false, openTopTenScorePopup: true });
+    const scoreObj = {
+      _id: get(getItem(storageName), "_id", ""),
+      score: get(this.state, "score", 0),
+    };
+    updateScoreApi(scoreObj).then((response) => {
+      if (
+        !apiRequestStatusCodes.FORBIDDEN.includes(get(response, "status", ""))
+      ) {
+        console.log(response);
+        this.setState({ hasGameEnded: false, openTopTenScorePopup: true });
+      }
+    });
   };
 
   handleCloseTopTenScorePopup = () => {
@@ -202,6 +220,17 @@ class Game extends Component {
   restartGame = () => {
     this.setState({ restart: false }, this.startGame());
   };
+
+  handleBack = () => {
+    clearTimeout(this.state.timeoutId);
+    window.removeEventListener("keydown", this.handleKeyDown);
+    this.props.history.push("/snake-time");
+  };
+
+  componentWillUnmount() {
+    clearTimeout(this.state.timeoutId);
+    window.removeEventListener("keydown", this.handleKeyDown);
+  }
 
   render() {
     const {
@@ -233,10 +262,7 @@ class Game extends Component {
               />
             </div>
           )}
-          <div
-            className="back"
-            onClick={() => this.props.history.push("/snake-time")}
-          >
+          <div className="back" onClick={this.handleBack}>
             <img src={backIcon} alt="back-icon" className="back-icon" />
           </div>
           <div className="snake-game_playground">
