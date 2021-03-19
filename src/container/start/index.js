@@ -19,6 +19,10 @@ const TopTenScorePopup = React.lazy(() =>
   import("../components/TopTenScorePopup")
 );
 const CustomTooltip = React.lazy(() => import("../../components/Tooltip"));
+const MessageComponent = React.lazy(() =>
+  import("../../components/MessageComponent")
+);
+const Loader = React.lazy(() => import("../../components/Loading"));
 
 const startConfig = resource.startContainerConfig;
 class Start extends Component {
@@ -30,6 +34,7 @@ class Start extends Component {
       openVerificationPopup: false,
       login: false,
       loading: false,
+      errorMessage: "",
     };
   }
 
@@ -77,6 +82,9 @@ class Start extends Component {
               setItem(storageName, response);
             }
           );
+        } else {
+          let errorMessage = get(response, "message", "");
+          this.setState({ errorMessage, loading: false });
         }
       });
     });
@@ -92,15 +100,32 @@ class Start extends Component {
     });
   };
 
+  handleErrorMessageClose = () => {
+    this.setState({ errorMessage: "" });
+  };
+
+  handleSpinner = () => {
+    this.setState((prevState) => ({ loading: !prevState.loading }));
+  };
+
   render() {
     const {
       openTopPlayerPopup,
       login,
       openTopTenScorePopup,
       openVerificationPopup,
+      errorMessage,
+      loading,
     } = this.state;
     return (
       <>
+        <MessageComponent
+          dismissible={true}
+          open={!isEmpty(errorMessage)}
+          message={errorMessage}
+          handleClose={this.handleErrorMessageClose}
+        />
+        {loading && <Loader />}
         <div className="start-screen_wrapper">
           <div className="start-screen_heading">{startConfig.heading}</div>
           <div className="start-screen_menu">
@@ -141,12 +166,14 @@ class Start extends Component {
           <TopPlayerPopup
             open={openTopPlayerPopup}
             handleClose={this.handleClosePopup}
+            handleSpinner={this.handleSpinner}
           />
         )}
         {openTopTenScorePopup && (
           <TopTenScorePopup
             open={openTopTenScorePopup}
             handleClose={this.handleClosePopup}
+            handleSpinner={this.handleSpinner}
           />
         )}
 

@@ -9,6 +9,9 @@ import "./TopTenScorePopup.scss";
 
 const List = React.lazy(() => import("../../../components/List"));
 const Popup = React.lazy(() => import("../../../components/popup"));
+const MessageComponent = React.lazy(() =>
+  import("../../../components/MessageComponent")
+);
 
 const popupConfig = resource.topTenScorePopupConfig;
 
@@ -17,25 +20,34 @@ class TopTenScorePopup extends Component {
     super(props);
     this.state = {
       topTenScores: [],
+      errorMessage: "",
     };
   }
   componentDidMount() {
     const userData = getItem(storageName);
+    this.props.handleSpinner();
     if (!isEmpty(userData) && !isEmpty(get(userData, "_id"))) {
       getTopTenScoreApi(get(userData, "_id", "")).then((response) => {
-        if (
-          apiRequestStatusCodes.FORBIDDEN.includes(get(response, "status", ""))
-        ) {
-          this.setState({ topTenScores: [] });
+        if (!isEmpty(get(response, "message", ""))) {
+          this.setState({
+            topTenScores: [],
+            errorMessage: get(response, "message", ""),
+          });
         } else {
           this.setState({ topTenScores: response });
         }
+        this.props.handleSpinner();
       });
     }
   }
 
+  handleErrorMessageClose = () => {
+    this.setState({ errorMessage: "" });
+  };
+
   render() {
     const { open, heading, handleClose } = this.props;
+    const { errorMessage } = this.state;
     const listItem = get(this.state, "topTenScores", []).map((item, index) => (
       <div className="player-top-score_details" key={index}>
         <div className="player-top-score_details_name">{index + 1}</div>
@@ -45,16 +57,24 @@ class TopTenScorePopup extends Component {
       </div>
     ));
     return (
-      <div className="player-top-score">
-        {listItem && (
-          <Popup
-            open={open}
-            handleClose={handleClose}
-            heading={heading}
-            children={<List listData={listItem} />}
-          />
-        )}
-      </div>
+      <>
+        <MessageComponent
+          dismissible={true}
+          open={!isEmpty(errorMessage)}
+          message={errorMessage}
+          handleClose={this.handleErrorMessageClose}
+        />
+        <div className="player-top-score">
+          {listItem && (
+            <Popup
+              open={open}
+              handleClose={handleClose}
+              heading={heading}
+              children={<List listData={listItem} />}
+            />
+          )}
+        </div>
+      </>
     );
   }
 }

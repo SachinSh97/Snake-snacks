@@ -3,6 +3,12 @@
 $root: ".list";
 
 #{$root} {
+  .empty {
+    text-align: center;
+    padding: 1em;
+    background-color: $primary-bg-color !important;
+  }
+
   & > * {
     margin-top: 1em;
     box-shadow: 0 0.28em 0.57em 0 $box-shadow-color;
@@ -20,12 +26,6 @@ $root: ".list";
 
     &:hover {
       box-shadow: 0 8px 16px 0 $box-shadow-color;
-    }
-
-    .empty {
-      text-align: center;
-      padding: 1em;
-      background-color: $primary-bg-color;
     }
 
     @keyframes animateIn {

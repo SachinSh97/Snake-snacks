@@ -1,0 +1,11 @@
+@import "../../style/variables";
+
+$root: ".message-wrapper";
+
+#{$root} {
+  position: absolute;
+  top: 2em;
+  right: 2em;
+  z-index: 12;
+  max-width: 27em;
+}

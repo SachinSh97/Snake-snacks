@@ -7,6 +7,9 @@ import "./TopPlayerListPopup.scss";
 
 const Popup = React.lazy(() => import("../../../components/popup"));
 const List = React.lazy(() => import("../../../components/List"));
+const MessageComponent = React.lazy(() =>
+  import("../../../components/MessageComponent")
+);
 
 const popupConfig = resource.topPlayerPopupConfig;
 
@@ -15,23 +18,32 @@ class TopPlayerPopup extends Component {
     super(props);
     this.state = {
       topTenScores: [],
+      errorMessage: "",
     };
   }
 
   componentDidMount() {
+    this.props.handleSpinner();
     getTopTenPlayerApi().then((response) => {
-      if (
-        apiRequestStatusCodes.FORBIDDEN.includes(get(response, "status", ""))
-      ) {
-        this.setState({ topTenScores: [] });
+      if (!isEmpty(get(response, "message", ""))) {
+        this.setState({
+          topTenScores: [],
+          errorMessage: get(response, "message", ""),
+        });
       } else {
         this.setState({ topTenScores: response });
       }
+      this.props.handleSpinner();
     });
   }
 
+  handleErrorMessageClose = () => {
+    this.setState({ errorMessage: "" });
+  };
+
   render() {
     const { open, handleClose, heading } = this.props;
+    const { errorMessage } = this.state;
     const listItem = get(this.state, "topTenScores", []).map((item) => (
       <div className="top-ten-score_details" key={get(item, "_id", "")}>
         <div className="top-ten-score_details_name">
@@ -43,16 +55,24 @@ class TopPlayerPopup extends Component {
       </div>
     ));
     return (
-      <div className="top-ten-score">
-        {listItem && (
-          <Popup
-            open={open}
-            handleClose={handleClose}
-            heading={heading}
-            children={<List listData={listItem} />}
-          />
-        )}
-      </div>
+      <>
+        <MessageComponent
+          dismissible={true}
+          open={!isEmpty(errorMessage)}
+          message={errorMessage}
+          handleClose={this.handleErrorMessageClose}
+        />
+        <div className="top-ten-score">
+          {listItem && (
+            <Popup
+              open={open}
+              handleClose={handleClose}
+              heading={heading}
+              children={<List listData={listItem} />}
+            />
+          )}
+        </div>
+      </>
     );
   }
 }
