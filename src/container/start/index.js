@@ -19,7 +19,6 @@ const TopTenScorePopup = React.lazy(() =>
   import("../components/TopTenScorePopup")
 );
 const CustomTooltip = React.lazy(() => import("../../components/Tooltip"));
-const SnakeBoard = React.lazy(() => import("../../components/SnakeBoard"));
 
 const startConfig = resource.startContainerConfig;
 class Start extends Component {
@@ -102,7 +101,6 @@ class Start extends Component {
     } = this.state;
     return (
       <>
-        {/* <SnakeBoard width={400} height={400} /> */}
         <div className="start-screen_wrapper">
           <div className="start-screen_heading">{startConfig.heading}</div>
           <div className="start-screen_menu">

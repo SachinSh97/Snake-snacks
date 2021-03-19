@@ -1,7 +1,3 @@
-export const StartPageConfig = {};
-
-export const snakeGameConfig = {};
-
 export const resource = {
   gameContainerConfig: {},
   startContainerConfig: {

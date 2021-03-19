@@ -49,6 +49,7 @@ class Game extends Component {
     if (isEmpty(userData)) {
       this.props.history.push("/snack-time");
     }
+    window.addEventListener("keydown", this.changeDirection);
   }
 
   handleSetConfiguration = ({ width, height, level }) => {
@@ -70,7 +71,6 @@ class Game extends Component {
       () => {
         this.drawSnake();
         this.startGame();
-        window.addEventListener("keydown", this.changeDirection);
       }
     );
   };
@@ -84,8 +84,8 @@ class Game extends Component {
         drawCanvas(
           snakeBoard,
           [snakePart.x, snakePart.y, 10, 10],
-          "lightblue",
-          "darkblue"
+          "#de701d",
+          "none"
         );
     });
   };
@@ -100,9 +100,13 @@ class Game extends Component {
     this.setState({ changeDirection: false });
     let timeOutId = setTimeout(() => {
       element &&
-        drawCanvas(element, [0, 0, element.width, element.height], "", "");
-      element &&
-        drawCanvas(element, [foodX, foodY, 10, 10], "lightgreen", "darkgreen");
+        drawCanvas(
+          element,
+          [0, 0, element.width, element.height],
+          "#5c544e",
+          ""
+        );
+      element && drawCanvas(element, [foodX, foodY, 10, 10], "#579120", "");
       this.moveSnake();
       this.drawSnake();
       // Call main again

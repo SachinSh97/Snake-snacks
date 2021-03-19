@@ -1,0 +1,19 @@
+@import "../../../style/variables";
+
+$root: ".player-top-score";
+
+#{$root} {
+  position: relative;
+
+  &_details {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em;
+  }
+
+  &_score {
+    text-align: center;
+  }
+}
