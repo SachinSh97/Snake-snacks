@@ -36,3 +36,9 @@ export const getChangeInPositionOfSnake = ({ keyPressed, dxy: change }) => {
   }
   return dxy;
 };
+
+export const filterByTerm = (inputArr, searchTerm) => {
+  return inputArr.filter(function(arrayElement) {
+    return arrayElement.url.match(searchTerm);
+  });
+}
